@@ -1,6 +1,7 @@
 # Realtime Vision Engine
 
 MACOS VERSION only for now because my windows pc broke😭
+half of these are ai, i rephrased it into my own words❕
 
 A low-latency, real-time computer vision pipeline in Python built on Ultralytics YOLO.
 Its made around a rule: **always work on the newest data, and never let a slow
