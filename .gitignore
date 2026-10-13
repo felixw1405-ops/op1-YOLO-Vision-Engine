@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+venv/
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Ultralytics
+runs/
+
+# Pytest
+.pytest_cache/
+
+# Logs
+*.log

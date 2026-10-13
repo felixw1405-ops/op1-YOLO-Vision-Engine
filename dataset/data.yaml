@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['enemy']
+
+roboflow:
+  workspace: felix-wong
+  project: operation-one
+  version: 7
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/felix-wong/operation-one/dataset/7

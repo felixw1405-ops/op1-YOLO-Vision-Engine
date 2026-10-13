@@ -1,0 +1,19 @@
+mss()
+monitor = sct.monitors[1]
+
+while True:
+    screenshot = sct.grab(monitor)
+
+    frame = np.array(screenshot)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+
+    detections = detector.detect(frame)
+
+    frame = draw(frame, detections)
+
+    cv2.imshow("YOLO Live Preview", frame)
+
+    if cv2.waitKey(1) & 0xFF == ord("q"):
+        break
+
+cv2.destroyAllWindows()
