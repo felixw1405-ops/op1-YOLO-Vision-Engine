@@ -1,108 +1,184 @@
-# Realtime Vision Engine
+# YOLO Vision Engine
 
-MACOS VERSION only for now because my windows pc broke😭
-half of these are ai, i rephrased it into my own words❕
+A real-time computer vision engine built with Python, YOLO, and an asynchronous capture/detection pipeline.
+v5.3a
+model version: 4.5
 
-A low-latency, real-time computer vision pipeline in Python built on Ultralytics YOLO.
-Its made around a rule: **always work on the newest data, and never let a slow
-stage delay a fast one.** (Thats not a rule i just created one lmfaoooo).
+---
 
-> v5.2 is complete. Currently working on v5.3a (instrumentation).
+## 🪟 Windows Installation
 
-## Design principles
+### 1. Install Requirements
 
-- **Latency over completeness.** Intermediate frames are dropped on purpose.
-- **Latest will always (i mean.. maybe) wins communication.** Stages share the newest value, not a backlog.
-- **Immutable packets.** Published data is never mutated after publication.
-- **Measure before optimizing.** Every stage is timestamped and observable.
-- **Maintainability over peak accuracy.** Small, replaceable components with clear interfaces.
+Install **Python 3.10+**:
+👉 https://python.org
 
-## Architecture
+During installation:
+- ✅ Enable **"Add Python to PATH"**
 
-```literally how it works
-Capture thread
-      |  publishes FramePacket
-      v
- latest_frame (AtomicReference)
-      |
-      v
-DetectorWorker thread
-      |  detect -> track
-      v
- latest_tracks (AtomicReference)
-      |
-      v
-Preview / renderer (independent loop)
+Verify your installation in Command Prompt (CMD) or PowerShell:
+```cmd
+python --version
 ```
 
-- **Capture** publishes immutable `FramePacket`s.
-- **DetectorWorker** consumes only the newest frame, runs detection, then tracking.
-- **Renderer** draws the latest frame and latest tracks at its own rate and never waits on inference.
+---
 
-## Data model
+### 2. Clone the Repository
 
-| Packet | Purpose |
-|---|---|
-| `FramePacket` | Image plus `frame_id` and capture timestamp |
-| `TrackPacket` | Tracks plus the capture timestamp of the frame they describe |
-| `PredictionPacket` | Draw-ready boxes extrapolated to a display time |
+Install Git:
+👉 https://git-scm.com
 
-All timestamps use a monotonic clock so stage ages can be compared safely.
+Clone the project:
+```cmd
+git clone https://github.com
+```
 
-## Requirements
+Enter the folder:
+```cmd
+cd op1-YOLO-Vision-Engine
+```
 
-- Python 3.10+
-- [Ultralytics](https://docs.ultralytics.com/)
-- OpenCV, NumPy
-- A CUDA-capable GPU is recommended
+---
 
+### 3. Create Virtual Environment
+
+Create the environment:
+```cmd
+python -m venv venv
+```
+
+Activate it:
+```cmd
+venv\Scripts\activate
+```
+You should see `(venv)` appear in your terminal prompt.
+
+---
+
+### 4. Install Dependencies
+
+Install the required packages:
+```cmd
+pip install -r requirements.txt
+```
+
+---
+
+### 5. Add Model Files
+
+Place your required YOLO model files inside a `models/` directory at the root of the project:
+```text
+models/
+└── v5_best.pt
+```
+
+---
+
+### 6. Run the Engine
+
+Start the preview:
+```cmd
+python preview.py
+```
+Press **`Q`** to exit.
+
+---
+
+## 🍏 macOS Installation
+
+### 1. Clone & Enter Repository
+
+Open your Terminal and run:
+```bash
+git clone https://github.com
+```
+
+Enter the folder:
+```bash
+cd op1-YOLO-Vision-Engine
+```
+
+---
+
+### 2. Create Virtual Environment
+
+Create the environment:
+```bash
+python3 -m venv venv
+```
+
+Activate it:
+```bash
+source venv/bin/activate
+```
+You should see `(venv)` appear in your terminal prompt.
+
+---
+
+### 3. Install Dependencies
+
+Install the required packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-## Usage
-
+*Note: If your requirements file is not available, install them manually:*
 ```bash
-python main.py
+pip install ultralytics opencv-python numpy mss torch
 ```
 
-Add configuration details here (model path, input source, image size, thresholds).
+---
 
-## Observability
+### 4. macOS System Permissions
 
-The engine reports per-stage timings so latency can be measured instead of guessed:
+Because this engine uses real-time screen capture, macOS requires explicit security clearance.
 
-- Capture time
-- Inference time
-- Tracker time
-- Frame age at display
-- Pipeline age (capture to display)
+1. Open **System Settings** → **Privacy & Security** → **Screen & System Audio Recording**.
+2. Flip the toggle to **Enable** permission for **Terminal** (and **VS Code** if running from an integrated terminal).
+3. Restart your Terminal or code editor for changes to apply.
 
-Report percentiles (p50 / p95 / p99), not just instantaneous values.
+---
 
-## Roadmap
+### 5. Run the Engine
 
-| Version | Focus | Status |
-|---|---|---|
-| v5.2 | Threaded capture, DetectorWorker, shared packets, latest-frame pipeline | Done |
-| v5.3a | Timestamps on every packet, latency metrics overlay, event-based wakeup, track TTL | Next |
-| v5.3b | Render-side prediction (extrapolate to the displayed frame's timestamp), One Euro smoothing | Planned |
-| v5.4 | ByteTrack, time-based `dt` and track lifetimes, Kalman tuning | Planned |
-| v6 | Record/replay, plugin API, world state | Planned |
+Start the preview:
+```bash
+python preview.py
+```
+Press **`Q`** to exit.
 
-Changes are made one at a time and measured against a baseline so improvements can be
-attributed to a specific cause.
+---
 
-## Known limitations
+## 🛠️ Troubleshooting
 
-- Boxes can lag moving objects until timestamp alignment and prediction land (v5.3).
-- Tracker parameters are currently frame-based, so behavior varies with load until v5.4.
+### Windows Execution Policy Error
+If PowerShell blocks you from activating the virtual environment (`venv\Scripts\activate`), run this command first to grant permission:
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+```
 
-## Contributing
+### Script/Command Not Found
+If running `python` or `git` returns an error saying the command is not found:
+* **Windows:** Re-run the Python installer and ensure the **"Add Python to PATH"** checkbox is selected.
+* **macOS:** Ensure you are using `python3` instead of `python`.
 
-Issues and pull requests are welcome. Please include before/after latency numbers
-for any performance-related change.
+### CUDA / GPU Acceleration (Windows)
+To leverage an Nvidia GPU on Windows for lightning-fast inference, ensure you have the matching CUDA Toolkit installed and reinstall PyTorch with CUDA support:
+```cmd
+pip uninstall torch torchvision
+pip install torch torchvision --index-url https://pytorch.org
+```
 
-## License
+---
 
-Add your license here.
+## 📝 Project Notes
+
+- **Hardware:** A dedicated GPU (Windows) or Apple Silicon Mac (M1/M2/M3/M4) is highly recommended for optimal inference performance.
+- **Environment:** Always ensure your virtual environment (`venv`) is activated before running the engine.
+- **Repository Hygiene:** Do not commit large model files (`.pt`) or raw datasets to GitHub. Keep them locally in your `models/` folder.
+
+## 📌 Current Version
+
+```text
+v5.2 - Async Vision Engine Architecture
+```
